@@ -4,8 +4,12 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+numpy = "*"
+pybullet = "*"
+gym = {editable = true, path = "./gym"}
+pybulletgym = {editable = true, path = "./pybullet-gym"}
 
 [dev-packages]
 
 [requires]
-python_version = "3.9"
+python_version = "3.5"
