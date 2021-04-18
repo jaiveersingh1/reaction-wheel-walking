@@ -2,7 +2,7 @@
 
 ## Setup
 
-1. Create new `conda` environment from `environment.yml`: `conda create -f environment.yml`
+1. Create new `conda` environment from `environment.yml`: `conda env create -f environment.yml`
 2. Activate new environment: `conda activate rwrl_env`
 3. Install `pybullet-gym` from submodule: `pip install -e ./pybullet-gym`
 
