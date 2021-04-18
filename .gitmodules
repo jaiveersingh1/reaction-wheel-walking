@@ -1,6 +1,0 @@
-[submodule "gym"]
-	path = gym
-	url = ./gym
-[submodule "pybullet-gym"]
-	path = pybullet-gym
-	url = ./pybullet-gym
