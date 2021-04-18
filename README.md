@@ -1,8 +1,11 @@
 # reaction-wheel-walking
+
 ## Setup
-0. Install `pipenv` if you haven't already: `pip install pipenv`
-1. Install all dependencies for this project: `pipenv install`
-2. Activate virtual environment: `pipenv shell`
+
+1. Create new `conda` environment from `environment.yml`: `conda create -f environment.yml`
+2. Activate new environment: `conda activate rwrl_env`
+3. Install `pybullet-gym` from submodule: `pip install -e ./pybullet-gym`
 
 ## Adding new dependencies
-1. Use `pipenv install same-thing-as-pip`
+
+1. Use `conda install new-dependency-whatever`
