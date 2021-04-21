@@ -2,24 +2,26 @@ import os
 import time
 
 import pybullet_envs
-from stable_baselines3 import PPO
+from stable_baselines3 import PPO, DDPG, A2C
 from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3.common.vec_env import VecNormalize
 
-ENV_NAME = "HopperBulletEnv-v0"
+_model = A2C
+
+ENV_NAME = "HalfCheetahBulletEnv-v0"
 log_dir = "/tmp/"
 stats_path = os.path.join(log_dir, ENV_NAME + "vec_normalize.pkl")
 
 training = True
 loadPrevious = True
 if training:
-    env = make_vec_env(ENV_NAME, n_envs=1)
+    env = make_vec_env(ENV_NAME, n_envs=10)
     env = VecNormalize(env, norm_obs=True, norm_reward=True, clip_obs=10.0)
 
     model = (
-        PPO.load(log_dir + "ppo_" + ENV_NAME)
+        _model.load(log_dir + "ppo_" + ENV_NAME, env)
         if loadPrevious
-        else PPO("MlpPolicy", env, verbose=1)
+        else _model("MlpPolicy", env, verbose=1)
     )
     model.learn(total_timesteps=50000)
 
@@ -28,7 +30,7 @@ if training:
     env.save(stats_path)
 
 # Load the agent
-model = PPO.load(log_dir + "ppo_" + ENV_NAME)
+model = _model.load(log_dir + "ppo_" + ENV_NAME)
 
 # Load the saved statistics
 env = make_vec_env(ENV_NAME, n_envs=1, env_kwargs={"render": True})
