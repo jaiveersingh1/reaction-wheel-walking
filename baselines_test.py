@@ -1,5 +1,6 @@
 import os
 import time
+import argparse
 
 import pybullet_envs
 from stable_baselines3 import PPO, DDPG, A2C
@@ -12,25 +13,34 @@ ENV_NAME = "HalfCheetahBulletEnv-v0"
 log_dir = "/tmp/"
 stats_path = os.path.join(log_dir, ENV_NAME + "vec_normalize.pkl")
 
-training = True
-loadPrevious = True
+parser = argparse.ArgumentParser()
+parser.add_argument('-t', '--training', default=False, action='store_true', help='Whether or not you want to do training')
+parser.add_argument('-l', '--load_previous', default=False, action='store_true', help='Whether or not you want to resume training from previous save')
+parser.add_argument('-T', '--train_steps', default=50000, type=int)
+parser.add_argument('-n', '--num_envs', default=1, type=int)
+
+args = parser.parse_args()
+
+training = args.training
+loadPrevious = args.load_previous
+print(args.load_previous)
 if training:
-    env = make_vec_env(ENV_NAME, n_envs=10)
+    env = make_vec_env(ENV_NAME, n_envs=args.num_envs)
     env = VecNormalize(env, norm_obs=True, norm_reward=True, clip_obs=10.0)
 
     model = (
-        _model.load(log_dir + "ppo_" + ENV_NAME, env)
+        _model.load(log_dir + str(_model.__module__) + ENV_NAME, env)
         if loadPrevious
         else _model("MlpPolicy", env, verbose=1)
     )
-    model.learn(total_timesteps=50000)
+    model.learn(total_timesteps=args.train_steps)
 
     # Don't forget to save the VecNormalize statistics when saving the agent
-    model.save(log_dir + "ppo_" + ENV_NAME)
+    model.save(log_dir + str(_model.__module__) + ENV_NAME)
     env.save(stats_path)
 
 # Load the agent
-model = _model.load(log_dir + "ppo_" + ENV_NAME)
+model = _model.load(log_dir + str(_model.__module__) + ENV_NAME)
 
 # Load the saved statistics
 env = make_vec_env(ENV_NAME, n_envs=1, env_kwargs={"render": True})
@@ -39,12 +49,12 @@ env = VecNormalize.load(stats_path, env)
 env.training = False
 # reward normalization is not needed at test time
 env.norm_reward = False
-
+env.render()
 obs = env.reset()
 for i in range(1000):
     action, _state = model.predict(obs, deterministic=True)
     obs, reward, done, info = env.step(action)
-    env.render()
+    # env.render()
     time.sleep(1 / 24)
     if done:
         print("Done now!")
