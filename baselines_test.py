@@ -1,7 +1,9 @@
 import os
 import time
 import argparse
+from gym.envs.registration import register
 
+import pybulletgym
 import pybullet_envs
 from stable_baselines3 import PPO, DDPG, A2C
 from stable_baselines3.common.env_util import make_vec_env
@@ -9,8 +11,16 @@ from stable_baselines3.common.vec_env import VecNormalize
 
 from stable_baselines3.common.callbacks import CheckpointCallback, EvalCallback
 
+# register(
+# 	id='rwrl-v0', 
+# 	entry_point='pybulletgym.envs.roboschool.envs.locomotion.rwrl_env:RWRLEnv',
+# 	max_episode_steps=1000,
+# 	reward_threshold=3000.0
+# )
+
 # ENV_NAME = "CartPole-v1"
-ENV_NAME = "HalfCheetahBulletEnv-v0"
+# ENV_NAME = "HalfCheetahBulletEnv-v0"
+ENV_NAME = "rwrl-v0"
 _model = PPO
 MODEL_PREFIX = "PPO"
 STATS_PATH = f"./{MODEL_PREFIX}_{ENV_NAME}_stats.pkl"
