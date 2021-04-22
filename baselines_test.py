@@ -42,7 +42,7 @@ parser.add_argument(
     help="Whether or not you want to resume training from previous save",
 )
 parser.add_argument("-s", "--save_freq", default=1000, type=int)
-parser.add_argument("-T", "--train_steps", default=100000, type=int)
+parser.add_argument("-T", "--train_steps", default=10000, type=int)
 parser.add_argument("-n", "--num_envs", default=1, type=int)
 
 args = parser.parse_args()
@@ -80,8 +80,6 @@ if training:
 
     # Don't forget to save the VecNormalize statistics when saving the agent
     env.save(STATS_PATH)
-    exit()
-
 
 # Load the agent
 model = _model.load(BEST_MODEL_PATH + "/best_model")
@@ -93,6 +91,7 @@ env = VecNormalize.load(STATS_PATH, env)
 env.training = False
 # reward normalization is not needed at test time
 env.norm_reward = False
+env.render()
 obs = env.reset()
 total_reward = 0
 for i in range(1000):
@@ -100,8 +99,8 @@ for i in range(1000):
     action, _state = model.predict(obs, deterministic=True)
     obs, reward, done, info = env.step(action)
     total_reward += reward
-    env.render()
-    time.sleep(1 / 60)
+    # env.render()
+    time.sleep(1 / 1)
     if done:
         obs = env.reset()
         print("Total reward:", total_reward)
