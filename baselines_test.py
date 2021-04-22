@@ -54,7 +54,7 @@ if training:
     env = make_vec_env(ENV_NAME, n_envs=args.num_envs)
     env = VecNormalize(env, norm_obs=True, norm_reward=True, clip_obs=10.0)
 
-    eval_env = make_vec_env(ENV_NAME, n_envs=args.num_envs)
+    eval_env = make_vec_env(ENV_NAME, n_envs=1)
     eval_env = VecNormalize(eval_env, norm_obs=True, norm_reward=True, clip_obs=10.0)
 
     model = (
@@ -100,7 +100,7 @@ for i in range(1000):
     obs, reward, done, info = env.step(action)
     total_reward += reward
     # env.render()
-    time.sleep(1 / 1)
+    input()
     if done:
         obs = env.reset()
         print("Total reward:", total_reward)
