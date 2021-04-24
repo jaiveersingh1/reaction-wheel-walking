@@ -1,0 +1,229 @@
+<?xml version="1.0"?><robot name="rwrl">
+	<link name="base_link">
+		<visual>
+			<geometry>
+				<box size=".075 .15 .075"/>
+			</geometry>
+			<origin rpy="0 0 0" xyz="0 0 .0375"/>
+			<material name="translucent">
+				<color rgba="1 1 1 .5"/>
+			</material>
+		</visual>
+		<collision>
+			<geometry>
+				<box size=".075 .15 .075"/>
+			</geometry>
+			<origin rpy="0 0 0" xyz="0 0 .0375"/>
+		</collision>
+		<inertial>
+			<mass value=".05"/>
+			<origin rpy="0 0 0" xyz="0 0 .0375"/>
+			<inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
+		</inertial>
+	</link>
+
+	<link name="x_wheel">
+		<visual>
+			<geometry>
+				<cylinder length=".01" radius=".03"/>
+			</geometry>
+			<origin rpy="0 0 0" xyz="0 0 0"/>
+			<material name="red">
+				<color rgba="1 0 0 1"/>
+			</material>
+		</visual>
+		<collision>
+			<geometry>
+				<cylinder length=".01" radius=".03"/>
+			</geometry>
+			<origin rpy="0 0 0" xyz="0 0 0"/>
+		</collision>
+		<inertial>
+			<mass value=".05"/>
+			<origin rpy="0 0 0" xyz="0 0 0"/>
+			<inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
+		</inertial>
+	</link>
+
+	<joint name="x_wheel_joint" type="continuous">
+		<parent link="base_link"/>
+		<child link="x_wheel"/>
+		<origin rpy="1.57075 0 0" xyz="0 .06 .0375"/>
+		<axis xyz="0 0 1"/>
+		<limit effort="1.0" velocity="0.5"/>
+	</joint>
+
+	<link name="y_wheel">
+		<visual>
+			<geometry>
+				<cylinder length=".01" radius=".03"/>
+			</geometry>
+			<origin rpy="0 0 0" xyz="0 0 0"/>
+			<material name="green">
+				<color rgba="0 1 0 1"/>
+			</material>
+		</visual>
+		<collision>
+			<geometry>
+				<cylinder length=".01" radius=".03"/>
+			</geometry>
+			<origin rpy="0 0 0" xyz="0 0 0"/>
+		</collision>
+		<inertial>
+			<mass value=".05"/>
+			<origin rpy="0 0 0" xyz="0 0 0"/>
+			<inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
+		</inertial>
+	</link>
+
+	<joint name="y_wheel_joint" type="continuous">
+		<parent link="base_link"/>
+		<child link="y_wheel"/>
+		<origin rpy="0 1.57075 0" xyz="0 -.04 .0375"/>
+		<axis xyz="0 0 1"/>
+		<limit effort="1.0" velocity="0.5"/>
+	</joint>
+
+	<link name="z_wheel">
+		<visual>
+			<geometry>
+				<cylinder length=".01" radius=".03"/>
+			</geometry>
+			<origin rpy="0 0 0" xyz="0 0 0"/>
+			<material name="yellow">
+				<color rgba="1 1 0 1"/>
+			</material>
+		</visual>
+		<collision>
+			<geometry>
+				<cylinder length=".01" radius=".03"/>
+			</geometry>
+			<origin rpy="0 0 0" xyz="0 0 0"/>
+		</collision>
+		<inertial>
+			<mass value=".05"/>
+			<origin rpy="0 0 0" xyz="0 0 0"/>
+			<inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
+		</inertial>
+	</link>
+
+	<joint name="z_wheel_joint" type="continuous">
+		<parent link="base_link"/>
+		<child link="z_wheel"/>
+		<origin rpy="0 0 0" xyz="0 .0225 .0375"/>
+		<axis xyz="0 0 1"/>
+		<limit effort="1.0" velocity="0.5"/>
+	</joint>
+
+	<link name="left_leg">
+		<visual>
+			<geometry>
+				<cylinder length=".1125" radius=".03"/>
+			</geometry>
+			<origin rpy="0 0 0" xyz="0 0 -.05625"/>
+			<material name="white">
+				<color rgba="1 1 1 1"/>
+			</material>
+		</visual>
+		<collision>
+			<geometry>
+				<cylinder length=".1125" radius=".03"/>
+			</geometry>
+			<origin rpy="0 0 0" xyz="0 0 -.05625"/>
+		</collision>
+		<inertial>
+			<mass value=".1"/>
+			<origin rpy="0 0 0" xyz="0 0 -.05625"/>
+			<inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
+		</inertial>
+	</link>
+
+	<link name="left_foot">
+		<visual>
+			<geometry>
+				<sphere radius=".0375"/>
+			</geometry>
+			<material name="white"/>
+		</visual>
+		<collision>
+			<geometry>
+				<sphere radius=".0375"/>
+			</geometry>
+		</collision>
+		<inertial>
+			<mass value=".03"/>
+			<origin rpy="0 0 0" xyz="0 0 0"/>
+			<inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
+		</inertial>
+	</link>
+
+	<joint name="base_to_left_leg" type="revolute">
+		<parent link="base_link"/>
+		<child link="left_leg"/>
+		<origin rpy="0 0 0" xyz="0 -.0375 0"/>
+		<axis xyz="0 -1 0"/>
+		<limit effort="1.0" lower="-1.57075" upper="1.57075" velocity="0.5"/>
+	</joint>
+
+	<joint name="left_ankle" type="fixed">
+		<parent link="left_leg"/>
+		<child link="left_foot"/>
+		<origin xyz="0 0 -.1125"/>
+	</joint>
+
+	<link name="right_leg">
+		<visual>
+			<geometry>
+				<cylinder length=".1125" radius=".03"/>
+			</geometry>
+			<origin rpy="0 0 0" xyz="0 0 -.05625"/>
+			<material name="white">
+				<color rgba="1 1 1 1"/>
+			</material>
+		</visual>
+		<collision>
+			<geometry>
+				<cylinder length=".1125" radius=".03"/>
+			</geometry>
+			<origin rpy="0 0 0" xyz="0 0 -.05625"/>
+		</collision>
+		<inertial>
+			<mass value=".1"/>
+			<origin rpy="0 0 0" xyz="0 0 -.05625"/>
+			<inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
+		</inertial>
+	</link>
+
+	<link name="right_foot">
+		<visual>
+			<geometry>
+				<sphere radius=".0375"/>
+			</geometry>
+			<material name="white"/>
+		</visual>
+		<collision>
+			<geometry>
+				<sphere radius=".0375"/>
+			</geometry>
+		</collision>
+		<inertial>
+			<mass value=".03"/>
+			<origin rpy="0 0 0" xyz="0 0 0"/>
+			<inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
+		</inertial>
+	</link>
+
+	<joint name="base_to_right_leg" type="revolute">
+		<parent link="base_link"/>
+		<child link="right_leg"/>
+		<origin rpy="0 0 0" xyz="0 .0375 0"/>
+		<axis xyz="0 -1 0"/>
+		<limit effort="1.0" lower="-1.57075" upper="1.57075" velocity="0.5"/>
+	</joint>
+
+	<joint name="right_ankle" type="fixed">
+		<parent link="right_leg"/>
+		<child link="right_foot"/>
+		<origin xyz="0 0 -.1125"/>
+	</joint>
+</robot>
