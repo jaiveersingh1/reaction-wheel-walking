@@ -7,4 +7,6 @@ dependencies:
   - numpy
   - pybullet
   - gym
+  - pytorch
+  - pyopengl
 prefix: /Users/jaiveersingh/opt/anaconda3/envs/rwrl_env
