@@ -1,0 +1,13 @@
+name: rwrl_env
+channels:
+  - conda-forge
+  - pytorch
+  - defaults
+dependencies:
+  - python=3.8
+  - numpy
+  - pybullet
+  - gym
+  - pytorch
+  - cudatoolkit=11.1
+prefix: /Users/jaiveersingh/opt/anaconda3/envs/rwrl_env
