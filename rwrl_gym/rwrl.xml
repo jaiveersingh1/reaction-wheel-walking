@@ -41,7 +41,7 @@
 				<inertial mass=".4"/>
 				<joint name="left_joint" type="hinge" pos="0 -.0375 .15" axis="0 -1 0" range="-60 60" damping="5"/>
 
-				<geom type="sphere" pos="0 -.0375 .0375" size=".0375 .0375 .0375" rgba="1 1 1 1"/>
+				<geom type="box" pos="0 -.0375 .0375" size=".0375 .0375 .0375" rgba="1 1 1 1"/>
 				<!-- <inertial pos="0 -.0375 -.1125" mass=".01" diaginertia="1e-6 1e-6 1e-6"/> -->
 				<inertial mass=".1"/>
 			</body>
@@ -52,7 +52,7 @@
 				<inertial mass=".4"/>
 				<joint name="right_joint" type="hinge" pos="0 .0375 .15" axis="0 -1 0" range="-60 60" damping="5"/>
 
-				<geom type="sphere" pos="0 .0375 .0375" size=".0375 .0375 .0375" rgba="1 1 1 1"/>
+				<geom type="box" pos="0 .0375 .0375" size=".0375 .0375 .0375" rgba="1 1 1 1"/>
 				<inertial mass=".1"/>
 				<!-- <inertial pos="0 .0375 -.1125" mass=".01" diaginertia="1e-6 1e-6 1e-6"/> -->
 			</body>
@@ -63,7 +63,7 @@
 		<motor ctrllimited="true" gear="200.0" joint="x_joint" name="x_joint"/>
 		<motor ctrllimited="true" gear="200.0" joint="y_joint" name="y_joint"/>
 		<motor ctrllimited="true" gear="200.0" joint="z_joint" name="z_joint"/>
-		<motor ctrllimited="true" gear="200" joint="left_joint" name="left_joint"/>
-		<motor ctrllimited="true" gear="200" joint="right_joint" name="right_joint"/>
+		<motor ctrllimited="true" gear="100" joint="left_joint" name="left_joint"/>
+		<motor ctrllimited="true" gear="100" joint="right_joint" name="right_joint"/>
 	</actuator>
 </mujoco>
