@@ -17,31 +17,31 @@
 			<body name="x_wheel">
 				<geom type="cylinder" fromto=".005 -.04 .1875 -.005 -.04 .1875" size=".03" rgba="0 1 0 1"/>
 				<!-- <inertial pos="0 -.04 .0375" mass=".1" diaginertia="1e-5 1e-5 1e-5"/> -->
-				<inertial mass=".1"/>
+				<inertial mass=".2"/>
 				<joint name="x_joint" type="hinge" pos="0 -.04 .1875" axis="1 0 0" limited="false"/>
 			</body>
 
 			<body name="y_wheel">
 				<geom type="cylinder" fromto="0 .065 .1875 0 .055 .1875" size=".03" rgba="1 0 0 1"/>
 				<!-- <inertial pos="0 .06 .0375" mass=".1" diaginertia="1e-5 1e-5 1e-5"/> -->
-				<inertial mass=".1"/>
+				<inertial mass=".2"/>
 				<joint name="y_joint" type="hinge" pos="0 .06 .1875" axis="0 1 0" limited="false"/>
 			</body>
 
 			<body name="z_wheel">
 				<geom type="cylinder" fromto="0 .0225 .1925 0 .0225 .1825" size=".03" rgba="0 0 1 1"/>
 				<!-- <inertial pos="0 .0225 .0375" mass=".1" diaginertia="1e-5 1e-5 1e-5"/> -->
-				<inertial mass=".1"/>
+				<inertial mass=".2"/>
 				<joint name="z_joint" type="hinge" pos="0 .0225 .18755" axis="0 0 1" limited="false"/>
 			</body>
 
 			<body name="left_leg">
 				<geom type="cylinder" fromto="0 -.0375 .15 0 -.0375 .0375" size=".03" rgba="1 1 1 1"/>
 				<!-- <inertial pos="0 -.0375 -.05625" mass=".05" diaginertia="1e-6 1e-6 1e-6"/> -->
-				<inertial mass=".5"/>
+				<inertial mass=".4"/>
 				<joint name="left_joint" type="hinge" pos="0 -.0375 .15" axis="0 -1 0" range="-60 60" damping="5"/>
 
-				<geom type="box" pos="0 -.0375 .0375" size=".0375 .0375 .0375" rgba="1 1 1 1"/>
+				<geom type="sphere" pos="0 -.0375 .0375" size=".0375 .0375 .0375" rgba="1 1 1 1"/>
 				<!-- <inertial pos="0 -.0375 -.1125" mass=".01" diaginertia="1e-6 1e-6 1e-6"/> -->
 				<inertial mass=".1"/>
 			</body>
@@ -49,10 +49,10 @@
 			<body name="right_leg">
 				<geom type="cylinder" fromto="0 .0375 .15 0 .0375 .0375" size=".03" rgba="1 1 1 1"/>
 				<!-- <inertial pos="0 .0375 -.05625" mass=".05" diaginertia="1e-6 1e-6 1e-6"/> -->
-				<inertial mass=".5"/>
+				<inertial mass=".4"/>
 				<joint name="right_joint" type="hinge" pos="0 .0375 .15" axis="0 -1 0" range="-60 60" damping="5"/>
 
-				<geom type="box" pos="0 .0375 .0375" size=".0375 .0375 .0375" rgba="1 1 1 1"/>
+				<geom type="sphere" pos="0 .0375 .0375" size=".0375 .0375 .0375" rgba="1 1 1 1"/>
 				<inertial mass=".1"/>
 				<!-- <inertial pos="0 .0375 -.1125" mass=".01" diaginertia="1e-6 1e-6 1e-6"/> -->
 			</body>

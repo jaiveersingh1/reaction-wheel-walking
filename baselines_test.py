@@ -55,6 +55,7 @@ if training:
         else _model(
             "MlpPolicy",
             env,
+            n_steps=256,
             verbose=1,
             tensorboard_log=f"./{MODEL_PREFIX}_{ENV_NAME}_tensorboard/",
         )

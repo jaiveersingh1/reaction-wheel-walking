@@ -14,8 +14,9 @@ class RWRL(WalkerBase, MJCFBasedRobot):
         # Use contact other than feet to terminate episode: due to a lot of strange walks using knees
         # return +1 if np.abs(pitch) < 1 and not self.feet_contact[2] and (self.feet_contact[0] or self.feet_contact[1]) and np.abs(z) < .35 else -1
         # return +1 if np.abs(pitch) < 1 and not self.feet_contact[2] and np.abs(z) < .35 else -1 # its swimming butterfly !
-        print(z)
-        return +1 if np.abs(pitch) < 1 and not self.feet_contact[2] and -.05 < z < .1 else -1
+        # print(z)
+        # print(pitch, z)
+        return +1 if np.abs(pitch) < 1.4 and not self.feet_contact[2] and -.03 < z < .2 else -1
 
     def robot_specific_reset(self, bullet_client):
         WalkerBase.robot_specific_reset(self, bullet_client)
