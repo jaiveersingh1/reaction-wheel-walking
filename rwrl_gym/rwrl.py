@@ -16,7 +16,7 @@ class RWRL(WalkerBase, MJCFBasedRobot):
         # return +1 if np.abs(pitch) < 1 and not self.feet_contact[2] and np.abs(z) < .35 else -1 # its swimming butterfly !
         # print(z)
         # print(pitch, z)
-        return +1 if -1.3 < pitch < 1.5 and not self.feet_contact[2] and -.03 < z < .2 else -1
+        return +1 if -1.3 < pitch < 1.5 and not self.feet_contact[2] and -.03 < z < .15 else -1
 
     def robot_specific_reset(self, bullet_client):
         WalkerBase.robot_specific_reset(self, bullet_client)
