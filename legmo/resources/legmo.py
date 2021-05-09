@@ -8,7 +8,7 @@ class LegMo:
         self.client = client
         f_name = os.path.join(os.path.dirname(__file__), "legmo.urdf")
         self.robot = p.loadURDF(
-            fileName=f_name, basePosition=[0, 0, 0.2], physicsClientId=client
+            fileName=f_name, basePosition=[0, 0, 0.125], physicsClientId=client
         )
 
         # Joint indices for right and left legs, respectively
@@ -16,10 +16,6 @@ class LegMo:
 
         # Joint indices for roll, pitch, and yaw wheels, respectively
         self.rw_joints = [2, 3, 4]
-
-        # TODO(JS): Remove this print
-        # for i in range(p.getNumJoints(self.robot, self.client)):
-        #     print(p.getJointInfo(self.robot, i, self.client))
 
     def get_ids(self):
         return self.client, self.robot
@@ -43,7 +39,7 @@ class LegMo:
             jointIndices=self.rw_joints,
             controlMode=p.VELOCITY_CONTROL,
             targetVelocities=[roll, pitch, yaw],
-            forces=[0.083] * 3,  # TODO(JS): Verify that this force makes sense
+            forces=[5000] * 3,  # TODO(JS): Verify that this force makes sense
             physicsClientId=self.client,
         )
 

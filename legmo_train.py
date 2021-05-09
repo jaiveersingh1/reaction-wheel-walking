@@ -21,16 +21,17 @@ TENSORBOARD_PATH = f"{DATA_FOLDER}/tensorboard/"
 
 
 def main(args):
-    # Create the environment
-    env = VecNormalize(
-        make_vec_env(LegMoEnv, args.num_envs, env_kwargs={"render": False}),
-        norm_obs=True,
-        norm_reward=True,
-        clip_obs=10.0,
-    )
 
     # Only train model if requested to do so
     if args.training:
+        # Create the environment
+        env = VecNormalize(
+            make_vec_env(LegMoEnv, args.num_envs, env_kwargs={"render": False}),
+            norm_obs=True,
+            norm_reward=True,
+            clip_obs=10.0,
+        )
+
         model = (
             MODEL_TYPE.load(BEST_MODEL_LOAD_PATH, env)
             if args.load_previous
@@ -64,7 +65,8 @@ def main(args):
 
     # After training (or if training is skipped), test best agent
     test_env = VecNormalize.load(
-        STATS_PATH, make_vec_env(LegMoEnv, n_envs=1, env_kwargs={"render": True})
+        STATS_PATH,
+        make_vec_env(LegMoEnv, n_envs=1, env_kwargs={"render": True}),
     )
     test_model = MODEL_TYPE.load(BEST_MODEL_LOAD_PATH, test_env)
 
@@ -72,19 +74,19 @@ def main(args):
     test_env.norm_reward = False
 
     total_reward = 0
-    obs = env.reset()
+    obs = test_env.reset()
     for i in range(args.test_steps):
         # Predict action given observation
         action, _state = test_model.predict(obs, deterministic=True)
 
         # Receive observation, reward, and metadata by stepping forward
-        obs, reward, done, info = env.step(action)
+        obs, reward, done, info = test_env.step(action)
 
         total_reward += reward
 
         # If done before timesteps expire, reset and continue
         if done:
-            obs = env.reset()
+            obs = test_env.reset()
             print("Total reward:", total_reward)
             total_reward = 0
 

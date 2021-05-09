@@ -10,14 +10,14 @@ from legmo.resources.plane import Plane
 class LegMoEnv(gym.Env):
     metadata = {"render.modes": ["human"]}
 
-    def __init__(self, render=False):
+    def __init__(self, render=False, hardness=0):
         """
         Action space has:
         - Target Reaction Wheel Velocities  (R, P, Y)
         - Target Servomotors Positions (R, L)
         """
-        RW_VELOCITY_MIN = -1.0
-        RW_VELOCITY_MAX = 1.0
+        RW_VELOCITY_MIN = -5000.0
+        RW_VELOCITY_MAX = 5000.0
         SERVO_POSITION_MIN = np.deg2rad(-60)
         SERVO_POSITION_MAX = np.deg2rad(60)
         self.action_space = gym.spaces.box.Box(
@@ -103,8 +103,10 @@ class LegMoEnv(gym.Env):
     def generateGoal(self, drawGoal=True):
         # Generate a goal orientation that is near the "North Pole" of
         # the unit sphere (ie, close-to-vertical orientation)
-        phi = np.deg2rad(self.np_random.uniform(0, 20))
-        theta = np.deg2rad(self.np_random.uniform(0, 360))
+        phi = np.deg2rad(self.np_random.uniform(-30, 30))
+        # theta = np.deg2rad(self.np_random.uniform(-20, 20))
+        # phi = np.deg2rad(30)
+        theta = np.deg2rad(0)
 
         # Spin around by theta
         theta_transform = p.getQuaternionFromEuler([0, 0, theta])
@@ -115,12 +117,13 @@ class LegMoEnv(gym.Env):
         _, goal_ori = p.multiplyTransforms(
             [0, 0, 0], theta_transform, [0, 0, 0], phi_transform
         )
+
         return goal_ori
 
     def step(self, action):
         GOAL_THRESHOLD = np.deg2rad(5)
         LIVING_REWARD = -0.5
-        MAX_STEPS = 200
+        MAX_STEPS = 300
 
         # Feed action to the robot and get observation of robot's state
         self.legmo.apply_action(action)
@@ -169,12 +172,13 @@ class LegMoEnv(gym.Env):
             if self.done:
                 p.addUserDebugText(
                     text=message,
-                    textPosition=[0.1, 0, 0],
+                    textPosition=[0.1, 0, 0.1],
                     textColorRGB=[0, 1, 0] if succeeded else [1, 0, 0],
                 )
-                sleep(0.25)
+                sleep(1)
 
-            # self.render()
+            self.render()
+
         return observation, reward, self.done, dict()
 
     def render(self, mode="human"):
