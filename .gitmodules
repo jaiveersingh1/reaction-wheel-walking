@@ -1,3 +1,0 @@
-[submodule "pybullet-gym"]
-	path = pybullet-gym
-	url = git@github.com:benelot/pybullet-gym.git
