@@ -45,6 +45,12 @@ class LegMo:
 
     def get_observation(self):
         # Return global orientation of robot (as would be measured by IMU)
-        pos, ori = p.getBasePositionAndOrientation(self.robot, self.client)
-        observation = ori
+        _, ori = p.getBasePositionAndOrientation(self.robot, self.client)
+        rightLeg, leftLeg = p.getJointStates(self.robot, self.leg_joints, self.client)
+        observation = ori + (rightLeg[0], leftLeg[0])
+
+        assert (
+            len(observation) == 6
+        ), f"LegMo robot observation should have 6 entries but found {len(observation)}"
+
         return observation

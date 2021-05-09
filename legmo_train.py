@@ -81,13 +81,15 @@ def main(args):
 
         # Receive observation, reward, and metadata by stepping forward
         obs, reward, done, info = test_env.step(action)
+        test_env.render()
 
         total_reward += reward
 
         # If done before timesteps expire, reset and continue
         if done:
-            obs = test_env.reset()
             print("Total reward:", total_reward)
+            time.sleep(1)
+            obs = test_env.reset()
             total_reward = 0
 
     # Evaluate using SB3 evaluation function

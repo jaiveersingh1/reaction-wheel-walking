@@ -1,7 +1,6 @@
 import gym
 import numpy as np
 import pybullet as p
-from time import sleep
 
 from legmo.resources.legmo import LegMo
 from legmo.resources.plane import Plane
@@ -10,33 +9,43 @@ from legmo.resources.plane import Plane
 class LegMoEnv(gym.Env):
     metadata = {"render.modes": ["human"]}
 
+    RW_VELOCITY_MIN = -5000.0
+    RW_VELOCITY_MAX = 5000.0
+    SERVO_POSITION_MIN = np.deg2rad(-60)
+    SERVO_POSITION_MAX = np.deg2rad(60)
+
+    MAX_STEPS = 300
+
+    ORIENTATION_WEIGHT = 0.5
+    LEGS_WEIGHT = 0
+    GOAL_THRESHOLD = ORIENTATION_WEIGHT * np.deg2rad(5) + LEGS_WEIGHT * np.deg2rad(5)
+
+    LIVING_REWARD = -0.5
+
     def __init__(self, render=False, hardness=0):
         """
         Action space has:
         - Target Reaction Wheel Velocities  (R, P, Y)
         - Target Servomotors Positions (R, L)
         """
-        RW_VELOCITY_MIN = -5000.0
-        RW_VELOCITY_MAX = 5000.0
-        SERVO_POSITION_MIN = np.deg2rad(-60)
-        SERVO_POSITION_MAX = np.deg2rad(60)
+
         self.action_space = gym.spaces.box.Box(
             low=np.array(
                 [
-                    RW_VELOCITY_MIN,  # Roll RW
-                    RW_VELOCITY_MIN,  # Pitch RW
-                    RW_VELOCITY_MIN,  # Yaw RW
-                    SERVO_POSITION_MIN,  # Right leg servo
-                    SERVO_POSITION_MIN,  # Left leg servo
+                    self.RW_VELOCITY_MIN,  # Roll RW
+                    self.RW_VELOCITY_MIN,  # Pitch RW
+                    self.RW_VELOCITY_MIN,  # Yaw RW
+                    self.SERVO_POSITION_MIN,  # Right leg servo
+                    self.SERVO_POSITION_MIN,  # Left leg servo
                 ]
             ),
             high=np.array(
                 [
-                    RW_VELOCITY_MAX,  # Roll RW
-                    RW_VELOCITY_MAX,  # Pitch RW
-                    RW_VELOCITY_MAX,  # Yaw RW
-                    SERVO_POSITION_MAX,  # Right leg servo
-                    SERVO_POSITION_MAX,  # Left leg servo
+                    self.RW_VELOCITY_MAX,  # Roll RW
+                    self.RW_VELOCITY_MAX,  # Pitch RW
+                    self.RW_VELOCITY_MAX,  # Yaw RW
+                    self.SERVO_POSITION_MAX,  # Right leg servo
+                    self.SERVO_POSITION_MAX,  # Left leg servo
                 ]
             ),
         )
@@ -52,14 +61,14 @@ class LegMoEnv(gym.Env):
                     -1.0,  # Current Quaternion Y
                     -1.0,  # Current Quaternion Z
                     -1.0,  # Current Quaternion W
-                    SERVO_POSITION_MIN,  # Current right leg servo
-                    SERVO_POSITION_MIN,  # Current left leg servo
+                    self.SERVO_POSITION_MIN,  # Current right leg servo
+                    self.SERVO_POSITION_MIN,  # Current left leg servo
                     -1.0,  # Goal Quaternion X
                     -1.0,  # Goal Quaternion Y
                     -1.0,  # Goal Quaternion Z
                     -1.0,  # Goal Quaternion W
-                    SERVO_POSITION_MIN,  # Goal right leg servo
-                    SERVO_POSITION_MIN,  # Goal left leg servo
+                    self.SERVO_POSITION_MIN,  # Goal right leg servo
+                    self.SERVO_POSITION_MIN,  # Goal left leg servo
                     -np.pi,  # Goal theta (walking) direction
                 ]
             ),
@@ -69,23 +78,21 @@ class LegMoEnv(gym.Env):
                     1.0,  # Current Quaternion Y
                     1.0,  # Current Quaternion Z
                     1.0,  # Current Quaternion W,
-                    SERVO_POSITION_MAX,  # Current right leg servo
-                    SERVO_POSITION_MAX,  # Current left leg servo
+                    self.SERVO_POSITION_MAX,  # Current right leg servo
+                    self.SERVO_POSITION_MAX,  # Current left leg servo
                     1.0,  # Goal Quaternion X
                     1.0,  # Goal Quaternion Y
                     1.0,  # Goal Quaternion Z
                     1.0,  # Goal Quaternion W
-                    SERVO_POSITION_MAX,  # Goal right leg servo
-                    SERVO_POSITION_MAX,  # Goal left leg servo
+                    self.SERVO_POSITION_MAX,  # Goal right leg servo
+                    self.SERVO_POSITION_MAX,  # Goal left leg servo
                     np.pi,  # Goal theta (walking) direction
                 ]
             ),
         )
         self.np_random, _ = gym.utils.seeding.np_random()
 
-        self.should_render = render
-        self.client = p.connect(p.GUI if self.should_render else p.DIRECT)
-
+        self.client = p.connect(p.GUI if render else p.DIRECT)
         self.reset()
 
     def reset(self):
@@ -100,64 +107,72 @@ class LegMoEnv(gym.Env):
         # Set the goal to a random target
         self.goal = self.generateGoal()
         self.done = False
+        self.message = ""
         self.num_steps = 0
 
         # Get observation to return
         legmo_obs = self.legmo.get_observation()
 
-        self.prev_dist_to_goal = np.arccos(
-            np.abs(np.dot(np.array(legmo_obs), np.array(self.goal)))
-        )
+        self.prev_dist_to_goal = self.distanceToGoal(legmo_obs)
+
         return np.array(legmo_obs + self.goal, dtype=np.float32)
 
-    def generateGoal(self, drawGoal=True):
+    def generateGoal(self):
+        # Generate goal leg positions
+        left = self.np_random.uniform(-30, 30)
+        right = self.np_random.uniform(-30, 30)
+
+        # Generate a goal movement direction
+        heading = 0
+
         # Generate a goal orientation that is near the "North Pole" of
         # the unit sphere (ie, close-to-vertical orientation)
-        phi = np.deg2rad(self.np_random.uniform(-30, 30))
-        # theta = np.deg2rad(self.np_random.uniform(-20, 20))
-        # phi = np.deg2rad(30)
-        theta = np.deg2rad(0)
-
-        # Spin around by theta
-        theta_transform = p.getQuaternionFromEuler([0, 0, theta])
-
-        # Pitch down by phi
-        phi_transform = p.getQuaternionFromEuler([0, phi, 0])
+        sphere_phi = np.deg2rad(self.np_random.uniform(-30, 30))
+        sphere_theta = np.deg2rad(self.np_random.uniform(-20, 20))
 
         _, goal_ori = p.multiplyTransforms(
-            [0, 0, 0], theta_transform, [0, 0, 0], phi_transform
+            [0, 0, 0],
+            p.getQuaternionFromEuler([0, 0, sphere_theta]),
+            [0, 0, 0],
+            p.getQuaternionFromEuler([0, sphere_phi, 0]),
         )
 
-        return goal_ori
+        goal = goal_ori + (right, left, heading)
+        return goal
+
+    def distanceToGoal(self, current_obs):
+
+        current_ori, current_legs = current_obs[:4], current_obs[4:6]
+        goal_ori, goal_legs = self.goal[:4], self.goal[4:6]
+
+        return (
+            np.arccos(np.abs(np.dot(np.array(current_ori), np.array(goal_ori))))
+            * self.ORIENTATION_WEIGHT
+            + np.linalg.norm(np.array(current_legs) - np.array(goal_legs))
+            * self.LEGS_WEIGHT
+        )
 
     def step(self, action):
-        GOAL_THRESHOLD = np.deg2rad(5)
-        LIVING_REWARD = -0.5
-        MAX_STEPS = 300
 
         # Feed action to the robot and get observation of robot's state
         self.legmo.apply_action(action)
         p.stepSimulation()
         legmo_obs = self.legmo.get_observation()
 
-        # Compute reward as change in angle between two orientations
-        dist_to_goal = np.arccos(
-            np.abs(np.dot(np.array(legmo_obs), np.array(self.goal)))
-        )
-        reward = max(self.prev_dist_to_goal - dist_to_goal, 0) + LIVING_REWARD
+        # Compute reward as reduction in distance to goal
+        dist_to_goal = self.distanceToGoal(legmo_obs)
+        reward = max(self.prev_dist_to_goal - dist_to_goal, 0) + self.LIVING_REWARD
         self.prev_dist_to_goal = dist_to_goal
 
         self.num_steps += 1
 
-        message = ""
-        succeeded = False
         # Done by timeout
-        if self.num_steps > MAX_STEPS:
-            message = "Timeout!"
+        if self.num_steps > self.MAX_STEPS:
+            self.message = "Timeout!"
             self.done = True
             reward = -5
         # Done by colliding with ground
-        if (
+        elif (
             len(
                 p.getContactPoints(
                     bodyA=self.legmo.robot, bodyB=self.plane.plane, linkIndexA=-1
@@ -165,29 +180,17 @@ class LegMoEnv(gym.Env):
             )
             > 0
         ):
-            message = "Collision!"
+            self.message = "Collision!"
             self.done = True
             reward = -50
         # Done by reaching goal
-        elif dist_to_goal < GOAL_THRESHOLD:
-            message = "Goal!"
+        elif dist_to_goal < self.GOAL_THRESHOLD:
+            self.message = "Goal!"
             self.done = True
+            self.succeeded = True
             reward = 100
 
-            succeeded = True
-
         observation = np.array(legmo_obs + self.goal, dtype=np.float32)
-
-        if self.should_render:
-            if self.done:
-                p.addUserDebugText(
-                    text=message,
-                    textPosition=[0.1, 0, 0.1],
-                    textColorRGB=[0, 1, 0] if succeeded else [1, 0, 0],
-                )
-                sleep(1)
-
-            self.render()
 
         return observation, reward, self.done, dict()
 
@@ -196,9 +199,10 @@ class LegMoEnv(gym.Env):
 
         legmoPos, _ = p.getBasePositionAndOrientation(self.legmo.robot)
 
-        vector = np.array(p.getMatrixFromQuaternion(self.goal)).reshape(
-            3, 3
-        ) @ np.array([0, 0, 1])
+        goal_ori = self.goal[:4]
+        vector = np.array(p.getMatrixFromQuaternion(goal_ori)).reshape(3, 3) @ np.array(
+            [0, 0, 1]
+        )
 
         p.addUserDebugLine(
             lineFromXYZ=legmoPos,
@@ -206,6 +210,10 @@ class LegMoEnv(gym.Env):
             lineColorRGB=[1, 0, 1],
             lineWidth=30,
         )
+        if self.done:
+            p.addUserDebugText(
+                text=self.message, textPosition=[0.1, 0, 0.1], textColorRGB=[0, 1, 0]
+            )
 
     def close(self):
         p.disconnect(self.client)
