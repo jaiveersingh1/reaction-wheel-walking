@@ -52,10 +52,15 @@ class LegMoEnv(gym.Env):
                     -1.0,  # Current Quaternion Y
                     -1.0,  # Current Quaternion Z
                     -1.0,  # Current Quaternion W
+                    SERVO_POSITION_MIN,  # Current right leg servo
+                    SERVO_POSITION_MIN,  # Current left leg servo
                     -1.0,  # Goal Quaternion X
                     -1.0,  # Goal Quaternion Y
                     -1.0,  # Goal Quaternion Z
                     -1.0,  # Goal Quaternion W
+                    SERVO_POSITION_MIN,  # Goal right leg servo
+                    SERVO_POSITION_MIN,  # Goal left leg servo
+                    -np.pi,  # Goal theta (walking) direction
                 ]
             ),
             high=np.array(
@@ -63,11 +68,16 @@ class LegMoEnv(gym.Env):
                     1.0,  # Current Quaternion X
                     1.0,  # Current Quaternion Y
                     1.0,  # Current Quaternion Z
-                    1.0,  # Current Quaternion W
+                    1.0,  # Current Quaternion W,
+                    SERVO_POSITION_MAX,  # Current right leg servo
+                    SERVO_POSITION_MAX,  # Current left leg servo
                     1.0,  # Goal Quaternion X
                     1.0,  # Goal Quaternion Y
                     1.0,  # Goal Quaternion Z
                     1.0,  # Goal Quaternion W
+                    SERVO_POSITION_MAX,  # Goal right leg servo
+                    SERVO_POSITION_MAX,  # Goal left leg servo
+                    np.pi,  # Goal theta (walking) direction
                 ]
             ),
         )
