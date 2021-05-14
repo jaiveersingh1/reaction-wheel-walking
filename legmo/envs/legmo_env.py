@@ -14,13 +14,14 @@ class LegMoEnv(gym.Env):
     SERVO_POSITION_MIN = np.deg2rad(-60)
     SERVO_POSITION_MAX = np.deg2rad(60)
 
-    MAX_STEPS = 300
+    MAX_STEPS = 1000
 
-    ORIENTATION_WEIGHT = 0.5
-    LEGS_WEIGHT = 0
+    ORIENTATION_WEIGHT = 0.1
+    LEGS_WEIGHT = 0.0
+    DIST_WEIGHT = 1000
     GOAL_THRESHOLD = ORIENTATION_WEIGHT * np.deg2rad(5) + LEGS_WEIGHT * np.deg2rad(5)
 
-    LIVING_REWARD = -0.5
+    LIVING_REWARD = 0.1
 
     def __init__(self, render=False, hardness=0):
         """
@@ -111,7 +112,7 @@ class LegMoEnv(gym.Env):
         self.num_steps = 0
 
         # Get observation to return
-        legmo_obs = self.legmo.get_observation()
+        legmo_obs, self.pos = self.legmo.get_observation()
 
         self.prev_dist_to_goal = self.distanceToGoal(legmo_obs)
 
@@ -119,16 +120,20 @@ class LegMoEnv(gym.Env):
 
     def generateGoal(self):
         # Generate goal leg positions
-        left = self.np_random.uniform(-30, 30)
-        right = self.np_random.uniform(-30, 30)
+        # left = self.np_random.uniform(-30, 30)
+        # right = self.np_random.uniform(-30, 30)
+        left = 0
+        right = 0
 
         # Generate a goal movement direction
-        heading = 0
+        heading = self.np_random.uniform(-np.pi/8, np.pi/8)
 
         # Generate a goal orientation that is near the "North Pole" of
         # the unit sphere (ie, close-to-vertical orientation)
-        sphere_phi = np.deg2rad(self.np_random.uniform(-30, 30))
-        sphere_theta = np.deg2rad(self.np_random.uniform(-20, 20))
+        # sphere_phi = np.deg2rad(self.np_random.uniform(-30, 30))
+        # sphere_theta = np.deg2rad(self.np_random.uniform(-20, 20))
+        sphere_phi = 0
+        sphere_theta = 0
 
         _, goal_ori = p.multiplyTransforms(
             [0, 0, 0],
@@ -144,12 +149,15 @@ class LegMoEnv(gym.Env):
 
         current_ori, current_legs = current_obs[:4], current_obs[4:6]
         goal_ori, goal_legs = self.goal[:4], self.goal[4:6]
+        goal_angle = self.goal[6]
 
         return (
             np.arccos(np.abs(np.dot(np.array(current_ori), np.array(goal_ori))))
             * self.ORIENTATION_WEIGHT
             + np.linalg.norm(np.array(current_legs) - np.array(goal_legs))
             * self.LEGS_WEIGHT
+            + np.dot(self.pos, [np.sin(goal_angle), np.cos(goal_angle), 0])
+            * -self.DIST_WEIGHT
         )
 
     def step(self, action):
@@ -157,7 +165,8 @@ class LegMoEnv(gym.Env):
         # Feed action to the robot and get observation of robot's state
         self.legmo.apply_action(action)
         p.stepSimulation()
-        legmo_obs = self.legmo.get_observation()
+        legmo_obs, pos = self.legmo.get_observation()
+        self.pos = pos
 
         # Compute reward as reduction in distance to goal
         dist_to_goal = self.distanceToGoal(legmo_obs)
@@ -170,7 +179,7 @@ class LegMoEnv(gym.Env):
         if self.num_steps > self.MAX_STEPS:
             self.message = "Timeout!"
             self.done = True
-            reward = -5
+            # reward = -5
         # Done by colliding with ground
         elif (
             len(
@@ -182,13 +191,13 @@ class LegMoEnv(gym.Env):
         ):
             self.message = "Collision!"
             self.done = True
-            reward = -50
+            reward -= 50
         # Done by reaching goal
-        elif dist_to_goal < self.GOAL_THRESHOLD:
-            self.message = "Goal!"
-            self.done = True
-            self.succeeded = True
-            reward = 100
+        # elif dist_to_goal < self.GOAL_THRESHOLD:
+        #     self.message = "Goal!"
+        #     self.done = True
+        #     self.succeeded = True
+        #     reward = 100
 
         observation = np.array(legmo_obs + self.goal, dtype=np.float32)
 

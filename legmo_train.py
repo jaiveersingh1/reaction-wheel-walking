@@ -115,7 +115,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("-s", "--save_freq", default=1000, type=int)
     parser.add_argument("-T", "--train_steps", default=10000, type=int)
-    parser.add_argument("-E", "--test_steps", default=500, type=int)
+    parser.add_argument("-E", "--test_steps", default=5000, type=int)
     parser.add_argument("-n", "--num_envs", default=1, type=int)
 
     args = parser.parse_args()

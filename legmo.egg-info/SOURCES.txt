@@ -1,0 +1,7 @@
+README.md
+setup.py
+legmo.egg-info/PKG-INFO
+legmo.egg-info/SOURCES.txt
+legmo.egg-info/dependency_links.txt
+legmo.egg-info/requires.txt
+legmo.egg-info/top_level.txt

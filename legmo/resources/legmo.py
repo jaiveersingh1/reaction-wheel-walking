@@ -11,6 +11,9 @@ class LegMo:
             fileName=f_name, basePosition=[0, 0, 0.125], physicsClientId=client
         )
 
+        # for i in range(p.getNumJoints(self.robot, self.client)):
+        #     print(p.getJointInfo(self.robot, i, self.client))
+
         # Joint indices for right and left legs, respectively
         self.leg_joints = [0, 1]
 
@@ -45,7 +48,7 @@ class LegMo:
 
     def get_observation(self):
         # Return global orientation of robot (as would be measured by IMU)
-        _, ori = p.getBasePositionAndOrientation(self.robot, self.client)
+        pos, ori = p.getBasePositionAndOrientation(self.robot, self.client)
         rightLeg, leftLeg = p.getJointStates(self.robot, self.leg_joints, self.client)
         observation = ori + (rightLeg[0], leftLeg[0])
 
@@ -53,4 +56,4 @@ class LegMo:
             len(observation) == 6
         ), f"LegMo robot observation should have 6 entries but found {len(observation)}"
 
-        return observation
+        return observation, pos
