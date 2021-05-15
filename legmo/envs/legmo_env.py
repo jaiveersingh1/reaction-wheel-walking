@@ -18,7 +18,7 @@ class LegMoEnv(gym.Env):
 
     ORIENTATION_WEIGHT = 0.1
     LEGS_WEIGHT = 0.0
-    DIST_WEIGHT = 1000
+    DIST_WEIGHT = 1500
     GOAL_THRESHOLD = ORIENTATION_WEIGHT * np.deg2rad(5) + LEGS_WEIGHT * np.deg2rad(5)
 
     LIVING_REWARD = 0.1
@@ -126,7 +126,7 @@ class LegMoEnv(gym.Env):
         right = 0
 
         # Generate a goal movement direction
-        heading = self.np_random.uniform(-np.pi/8, np.pi/8)
+        heading = self.np_random.uniform(-np.pi/2, np.pi/2)
 
         # Generate a goal orientation that is near the "North Pole" of
         # the unit sphere (ie, close-to-vertical orientation)
@@ -156,7 +156,7 @@ class LegMoEnv(gym.Env):
             * self.ORIENTATION_WEIGHT
             + np.linalg.norm(np.array(current_legs) - np.array(goal_legs))
             * self.LEGS_WEIGHT
-            + np.dot(self.pos, [np.sin(goal_angle), np.cos(goal_angle), 0])
+            + np.dot(self.pos, [np.cos(goal_angle), np.sin(goal_angle), 0])
             * -self.DIST_WEIGHT
         )
 
