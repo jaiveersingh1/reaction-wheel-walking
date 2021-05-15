@@ -3,20 +3,24 @@ import time
 import pybullet_data
 import numpy as np 
 
-class BoxBot:
+class Legmo:
     def __init__(self, startPos, startOrientation):
-        self.id = p.loadURDF("boxbot.urdf", startPos, startOrientation)
-        self.desiredPosEuler = np.pi/4
-        self.lastPos = 0
-        self.currPos = 0
+        self.id = p.loadURDF("legmo.urdf", startPos, startOrientation)
+        self.desiredPosEuler = np.array([np.pi/4, 0, 0])
+        self.lastPos = np.array([0, 0, 0])
+        self.currPos = np.array([0, 0, 0])
+
+        self.kp = np.array([5.5, 0, 0])
+        self.kd = np.array([20, 0, 0])
         
     def simulate(self, time_steps):
         for i in range(time_steps):
             print(i)
             self.lastPos = self.currPos
-            self.currPos = self.getEulerOrientation()[0]
-            if i > 200:
-                self.pdControl(10, 50)
+            self.currPos = np.array(self.getEulerOrientation())
+            if i > 1000:
+                print(self.getEulerOrientation())
+                self.pdControl(self.kp, self.kd)
             p.stepSimulation()
             time.sleep(1.0 / 240.0)
     
@@ -27,9 +31,9 @@ class BoxBot:
     def getEulerOrientation(self):
         return p.getEulerFromQuaternion(self.getPose()[1])
     
-    def setTorque(self, torque):
+    def setTorque(self, torque, joint=0):
         p.setJointMotorControl2(bodyIndex=self.id,
-                                        jointIndex=0,
+                                        jointIndex=joint,
                                         controlMode=p.TORQUE_CONTROL,
                                         force=torque)
 
@@ -45,8 +49,10 @@ class BoxBot:
         e = self.desiredPosEuler - self.currPos
         e_dot = -velocity
         
-        controlInput = kp * e + kd * e_dot
-        self.setTorque(-controlInput)
+        controlInput = -kp * e - kd * e_dot
+        self.setTorque(controlInput[0], 2)
+        self.setTorque(controlInput[1], 3)
+        self.setTorque(controlInput[2], 4)
 
 
 
@@ -56,6 +62,24 @@ class BoxBot:
             self.setTorque(-1)
         elif orientation[0] > self.desiredPosEuler[0]:
             self.setTorque(1)
+    
+    def render(self, mode="human"):
+        p.removeAllUserDebugItems()
+
+        legmoPos, _ = p.getBasePositionAndOrientation(self.id)
+
+        goal_ori = p.getQuaternionFromEuler(self.desiredPosEuler)
+        vector = np.array(p.getMatrixFromQuaternion(goal_ori)).reshape(3, 3) @ np.array(
+            [0, 0, 1]
+        )
+
+        p.addUserDebugLine(
+            lineFromXYZ=legmoPos,
+            lineToXYZ=(np.array(legmoPos) + np.array(vector)),
+            lineColorRGB=[1, 0, 1],
+            lineWidth=30,
+        )
+
 
 def main():
     print("STARTING SIM")
@@ -63,13 +87,15 @@ def main():
     p.setAdditionalSearchPath(pybullet_data.getDataPath())
     p.setGravity(0, 0, -9.8)
     planeId = p.loadURDF("plane.urdf")  # Loads the floor
-    startPos = [0, 0, 1]
+    startPos = [0, 0, .2]
     startOrientation = p.getQuaternionFromEuler([0, 0, 0])
-    box = BoxBot(startPos, startOrientation)
+    legmo = Legmo(startPos, startOrientation)
 
-    box.simulate(10000)
+    legmo.simulate(10000)
 
     p.disconnect()
+
+ 
 
 if __name__ == "__main__":
     main()
